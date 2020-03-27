@@ -3,6 +3,7 @@
 namespace afDetailPage;
 
 use Shopware\Components\Plugin;
+use Shopware\Components\Plugin\Context\InstallContext;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 /**
@@ -20,6 +21,25 @@ class afDetailPage extends Plugin
         parent::build($container);
     }
 
+    public function install(InstallContext $context)
+    {
+	$service = $this->container->get('shopware_attribute.crud_service');
+
+	$service->update(
+	    's_articles_attributes',
+	    'af_detailpage_image',
+	    \Shopware\Bundle\AttributeBundle\Service\TypeMapping::TYPE_SINGLE_SELECTION,
+	    [
+		'entity'  => \Shopware\Models\Media\Media::class,
+		'label'	    => 'Bild unter Artikel Nr. im Standart Template',
+		'displayInBackend' => true,
+		'supportText' => '',
+		'translatable' => false,
+		'position' => 1,
+	    ]
+	);
+    }
+
     public static function getSubscribedEvents()
     {
 	return [
@@ -29,12 +49,29 @@ class afDetailPage extends Plugin
 
     public function onDetail(\Enlight_Event_EventArgs $args)
     {
+	$connection = $this->container->get('dbal_connection');
         $config = $this->container->get('shopware.plugin.cached_config_reader')->getByPluginName($this->getName());
         $controller = $args->get('subject');
         $view = $controller->View();
         $this->container->get('Template')->addTemplateDir($this->getPath() . '/Resources/views/');
+	$sArticle = $view->getAssign('sArticle');
+	$articleImage = $sArticle['af_detailpage_image'];
+	$view->assign('af_detailpage_image', $articleImage);
 
+	$mediaservice = $this->container->get('shopware_media.media_service');
 
+	    if($articleImage != NULL){
+		$mediapath = $connection->fetchColumn(
+		    'SELECT path FROM s_media WHERE id = '.$articleImage.''
+		);
+	    }
+
+	    if($mediaservice->has($mediapath) == 1)
+	    {
+		$mediapathComplete = $mediaservice->getUrl($mediapath);
+	    }
+	$articleImg = $mediapathComplete;
+	$controller->View()->assign('af_dp_image', $articleImg);
     }
 
 }
