@@ -4,6 +4,7 @@ namespace afDetailPage;
 
 use Shopware\Components\Plugin;
 use Shopware\Components\Plugin\Context\InstallContext;
+use Shopware\Components\Plugin\Context\UninstallContext;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 /**
@@ -38,6 +39,12 @@ class afDetailPage extends Plugin
 		'position' => 1,
 	    ]
 	);
+    }
+
+    public function uninstall(Uninstallcontext $context)
+    {
+	$service = $this->container->get('shopware_attribute.crud_service');
+	$service->delete('s_articles_attributes', 'af_detailpage_image');	
     }
 
     public static function getSubscribedEvents()
