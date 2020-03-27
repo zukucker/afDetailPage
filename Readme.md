@@ -1,5 +1,5 @@
 # afDetailPage
-##Was macht dieses Plugin?
+## Was macht dieses Plugin?
 Das Plugin fügt im Standart Template unterhlab der Artikel Nummer ein Bild ein,
 welches im Backend ausgewählt wurde.
 
